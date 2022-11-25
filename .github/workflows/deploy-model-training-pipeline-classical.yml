@@ -21,7 +21,7 @@ jobs:
       needs: [get-config,register-environment]
       uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
       with:
-        cluster_name: ${{ needs.get-config.outputs.resource_group }}
+        cluster_name: cpu-cluster
         size: Standard_DS3_v2
         min_instances: 0
         max_instances: 4
