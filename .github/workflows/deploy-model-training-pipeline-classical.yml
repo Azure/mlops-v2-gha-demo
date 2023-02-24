@@ -17,6 +17,18 @@ jobs:
         conda_file: data-science/environment/train-conda.yml
       secrets:
           creds: ${{secrets.AZURE_CREDENTIALS}}
+          
+  register-dataset:
+    needs: get-config
+    uses: Azure/mlops-templates/.github/workflows/register-dataset.yml@main
+    with:
+      resource_group: ${{ needs.get-config.outputs.resource_group }}
+      workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
+      name: taxi-data
+      data_file: mlops/azureml/train/data.yml
+    secrets:
+      creds: ${{secrets.AZURE_CREDENTIALS}}
+      
   create-compute:
       needs: [get-config,register-environment]
       uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
@@ -30,8 +42,9 @@ jobs:
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
       secrets:
           creds: ${{secrets.AZURE_CREDENTIALS}}
+      
   run-pipeline:
-      needs: [get-config,register-environment,create-compute]
+      needs: [get-config,register-environment,create-compute,register-dataset]
       uses: Azure/mlops-templates/.github/workflows/run-pipeline.yml@main
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
