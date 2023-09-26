@@ -34,9 +34,9 @@ jobs:
       uses: Azure/mlops-templates/.github/workflows/create-compute.yml@main
       with:
         cluster_name: cpu-cluster
-        size: Standard_DD_v4
+        size: Standard_DADS_v5
         min_instances: 0
-        max_instances: 2
+        max_instances: 1
         cluster_tier: dedicated
         resource_group: ${{ needs.get-config.outputs.resource_group }}
         workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
