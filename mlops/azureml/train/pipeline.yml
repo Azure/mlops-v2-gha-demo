@@ -8,7 +8,7 @@ inputs:
   input:
     type: uri_file
     path: azureml:taxi-data@latest
-  enable_monitoring: 'false'
+  enable_monitoring: 'true'
   table_name: 'taximonitoring'
 
 outputs: 
