@@ -1,7 +1,10 @@
 name: deploy-model-training-pipeline
 
 on: 
-  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+      
 jobs:
   get-config:
       uses: Azure/mlops-templates/.github/workflows/read-yaml.yml@main
