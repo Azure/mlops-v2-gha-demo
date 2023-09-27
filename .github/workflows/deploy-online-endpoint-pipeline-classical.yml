@@ -28,8 +28,6 @@ jobs:
         endpoint_name: ${{ format('taxi-gha-{0}', needs.get-config.outputs.oep) }}
         endpoint_type: online
         deployment_name: taxi-online-dp
-        instance_type: Standard_DS3_v2
-        instance_count: 1
       secrets:
         creds: ${{secrets.AZURE_CREDENTIALS}}
   allocate-traffic:
