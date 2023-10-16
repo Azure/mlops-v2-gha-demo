@@ -47,25 +47,28 @@ CAT_NOM_COLS = [
     "vendor",
 ]
 
-CAT_ORD_COLS = [
-]
+CAT_ORD_COLS = []  # type: ignore
+
 
 def parse_args():
-    '''Parse input arguments'''
+    """Parse input arguments"""
 
     parser = argparse.ArgumentParser("predict")
     parser.add_argument("--model_name", type=str, help="Name of registered model")
     parser.add_argument("--model_input", type=str, help="Path of input model")
     parser.add_argument("--test_data", type=str, help="Path to test dataset")
     parser.add_argument("--evaluation_output", type=str, help="Path of eval results")
-    parser.add_argument("--runner", type=str, help="Local or Cloud Runner", default="CloudRunner")
+    parser.add_argument(
+        "--runner", type=str, help="Local or Cloud Runner", default="CloudRunner"
+    )
 
     args = parser.parse_args()
 
     return args
 
+
 def main(args):
-    '''Read trained model and test dataset, evaluate model and save result'''
+    """Read trained model and test dataset, evaluate model and save result"""
 
     # Load the test data
     test_data = pd.read_parquet(Path(args.test_data))
@@ -75,15 +78,16 @@ def main(args):
     X_test = test_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
 
     # Load the model from input port
-    model =  mlflow.sklearn.load_model(args.model_input) 
+    model = mlflow.sklearn.load_model(args.model_input)
 
     # ---------------- Model Evaluation ---------------- #
     yhat_test, score = model_evaluation(X_test, y_test, model, args.evaluation_output)
 
     # ----------------- Model Promotion ---------------- #
     if args.runner == "CloudRunner":
-        predictions, deploy_flag = model_promotion(args.model_name, args.evaluation_output, X_test, y_test, yhat_test, score)
-
+        predictions, deploy_flag = model_promotion(
+            args.model_name, args.evaluation_output, X_test, y_test, yhat_test, score
+        )
 
 
 def model_evaluation(X_test, y_test, model, evaluation_output):
@@ -95,7 +99,7 @@ def model_evaluation(X_test, y_test, model, evaluation_output):
     output_data = X_test.copy()
     output_data["real_label"] = y_test
     output_data["predicted_label"] = yhat_test
-    output_data.to_csv((Path(evaluation_output) / "predictions.csv"))
+    output_data.to_csv(Path(evaluation_output) / "predictions.csv")
 
     # Evaluate Model performance with the test set
     r2 = r2_score(y_test, yhat_test)
@@ -119,8 +123,8 @@ def model_evaluation(X_test, y_test, model, evaluation_output):
     mlflow.log_metric("test mae", mae)
 
     # Visualize results
-    plt.scatter(y_test, yhat_test,  color='black')
-    plt.plot(y_test, y_test, color='blue', linewidth=3)
+    plt.scatter(y_test, yhat_test, color="black")
+    plt.plot(y_test, y_test, color="blue", linewidth=3)
     plt.xlabel("Real value")
     plt.ylabel("Predicted value")
     plt.title("Comparing Model Predictions to Real values - Test Data")
@@ -129,8 +133,9 @@ def model_evaluation(X_test, y_test, model, evaluation_output):
 
     return yhat_test, r2
 
+
 def model_promotion(model_name, evaluation_output, X_test, y_test, yhat_test, score):
-    
+
     scores = {}
     predictions = {}
 
@@ -139,10 +144,12 @@ def model_promotion(model_name, evaluation_output, X_test, y_test, yhat_test, sc
     for model_run in client.search_model_versions(f"name='{model_name}'"):
         model_version = model_run.version
         mdl = mlflow.pyfunc.load_model(
-            model_uri=f"models:/{model_name}/{model_version}")
+            model_uri=f"models:/{model_name}/{model_version}"
+        )
         predictions[f"{model_name}:{model_version}"] = mdl.predict(X_test)
         scores[f"{model_name}:{model_version}"] = r2_score(
-            y_test, predictions[f"{model_name}:{model_version}"])
+            y_test, predictions[f"{model_name}:{model_version}"]
+        )
 
     if scores:
         if score >= max(list(scores.values())):
@@ -153,15 +160,16 @@ def model_promotion(model_name, evaluation_output, X_test, y_test, yhat_test, sc
         deploy_flag = 1
     print(f"Deploy flag: {deploy_flag}")
 
-    with open((Path(evaluation_output) / "deploy_flag"), 'w') as outfile:
+    with open((Path(evaluation_output) / "deploy_flag"), "w") as outfile:
         outfile.write(f"{int(deploy_flag)}")
 
     # add current model score and predictions
     scores["current model"] = score
     predictions["currrent model"] = yhat_test
 
-    perf_comparison_plot = pd.DataFrame(
-        scores, index=["r2 score"]).plot(kind='bar', figsize=(15, 10))
+    perf_comparison_plot = pd.DataFrame(scores, index=["r2 score"]).plot(
+        kind="bar", figsize=(15, 10)
+    )
     perf_comparison_plot.figure.savefig("perf_comparison.png")
     perf_comparison_plot.figure.savefig(Path(evaluation_output) / "perf_comparison.png")
 
@@ -169,6 +177,7 @@ def model_promotion(model_name, evaluation_output, X_test, y_test, yhat_test, sc
     mlflow.log_artifact("perf_comparison.png")
 
     return predictions, deploy_flag
+
 
 if __name__ == "__main__":
 
@@ -185,7 +194,7 @@ if __name__ == "__main__":
 
     for line in lines:
         print(line)
-    
+
     main(args)
 
     mlflow.end_run()

@@ -19,7 +19,7 @@ resource "azurerm_storage_account" "st" {
   is_hns_enabled           = var.hns_enabled
 
   tags = var.tags
-  
+
 }
 
 # Virtual Network & Firewall configuration

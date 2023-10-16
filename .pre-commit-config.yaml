@@ -1,14 +1,51 @@
 repos:
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.2.0
+    rev: v4.3.0
     hooks:
+    -   id: check-ast
+    -   id: check-json
+    -   id: check-toml
+    -   id: check-xml
     -   id: check-yaml
+    -   id: check-builtin-literals
+    -   id: check-case-conflict
+    -   id: check-docstring-first
+    -   id: detect-private-key
     -   id: end-of-file-fixer
+    -   id: name-tests-test
     -   id: trailing-whitespace
-
-    # Opinionated code formatter to forget about formatting
--   repo: https://github.com/psf/black
-    rev: 21.12b0
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v3.1.0
     hooks:
-    -   id: black
-        additional_dependencies: ['click==8.0.4']
+    - id: pyupgrade
+      name: PyUpgrade
+-   repo: https://github.com/psf/black
+    rev: 22.3.0
+    hooks:
+    - id: black
+      name: Black
+-   repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.910
+    hooks:
+    - id: mypy
+      name: MyPy
+-   repo: https://github.com/PyCQA/bandit
+    rev: 1.7.4
+    hooks:
+    - id: bandit
+      name: bandit
+
+# # XXX gitleaks needs to be configured
+# -   repo: https://github.com/zricethezav/gitleaks
+#     rev: v8.15.0
+#     hooks:
+#     - id: gitleaks-docker
+#       name: gitleaks
+#       entry: zricethezav/gitleaks detecet --verbose --source0. --config=gitleaks.toml --redact
+
+# XXX ruff is still alpha: but it will become a better alternative
+# -   repo: https://github.com/astral-sh/ruff-pre-commit
+#     rev: v0.0.284
+#     hooks:
+#     - id: ruff
+#       args: [--fix, --exit-non-zero-on-fix]

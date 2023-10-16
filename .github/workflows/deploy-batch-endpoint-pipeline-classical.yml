@@ -1,6 +1,6 @@
 name: deploy-batch-endpoint-pipeline
 
-on: 
+on:
   workflow_dispatch:
 jobs:
   get-config:
@@ -16,7 +16,7 @@ jobs:
         min_instances: 0
         max_instances: 5
         resource_group: ${{ needs.get-config.outputs.resource_group }}
-        workspace_name: ${{ needs.get-config.outputs.aml_workspace }}     
+        workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
       secrets:
           creds: ${{secrets.AZURE_CREDENTIALS}}
   create-endpoint:
@@ -24,9 +24,9 @@ jobs:
       uses: Azure/mlops-templates/.github/workflows/create-endpoint.yml@main
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
-        workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
+        workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
         endpoint_file: mlops/azureml/deploy/batch/batch-endpoint.yml
-        endpoint_name:  ${{ format('taxi-gha-{0}', needs.get-config.outputs.bep) }} 
+        endpoint_name:  ${{ format('taxi-gha-{0}', needs.get-config.outputs.bep) }}
         endpoint_type: batch
       secrets:
         creds: ${{secrets.AZURE_CREDENTIALS}}
@@ -35,9 +35,9 @@ jobs:
       needs: [get-config,create-endpoint]
       with:
         resource_group: ${{ needs.get-config.outputs.resource_group }}
-        workspace_name: ${{ needs.get-config.outputs.aml_workspace }} 
+        workspace_name: ${{ needs.get-config.outputs.aml_workspace }}
         endpoint_file: mlops/azureml/deploy/batch/batch-deployment.yml
-        endpoint_name: ${{ format('taxi-gha-{0}', needs.get-config.outputs.bep) }} 
+        endpoint_name: ${{ format('taxi-gha-{0}', needs.get-config.outputs.bep) }}
         endpoint_type: batch
         deployment_name: eptestdeploy
       secrets:

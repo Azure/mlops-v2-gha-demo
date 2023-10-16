@@ -1,6 +1,6 @@
 name: tf-gha-deploy-infra.yml
- 
-on: 
+
+on:
   workflow_dispatch:
 env:
     config_env: 'none'
@@ -14,7 +14,7 @@ jobs:
     uses: Azure/mlops-templates/.github/workflows/tf-gha-install-terraform.yml@main
     with:
       TFAction: 'apply'
-      dply_environment: ${{ needs.set-env-branch.outputs.config-file }} 
+      dply_environment: ${{ needs.set-env-branch.outputs.config-file }}
       location: ${{ needs.get-config.outputs.location }}
       namespace: ${{ needs.get-config.outputs.namespace }}
       postfix: ${{ needs.get-config.outputs.postfix }}
@@ -42,4 +42,3 @@ jobs:
     - id: deploy-aml-workspace
       name: deploy-aml-workspace
       run: echo "OK"
-

@@ -46,37 +46,58 @@ CAT_NOM_COLS = [
     "vendor",
 ]
 
-CAT_ORD_COLS = [
-]
+CAT_ORD_COLS = []  # type: ignore
 
 
 def parse_args():
-    '''Parse input arguments'''
+    """Parse input arguments"""
 
     parser = argparse.ArgumentParser("train")
     parser.add_argument("--train_data", type=str, help="Path to train dataset")
     parser.add_argument("--model_output", type=str, help="Path of output model")
 
     # classifier specific arguments
-    parser.add_argument('--regressor__n_estimators', type=int, default=500,
-                        help='Number of trees')
-    parser.add_argument('--regressor__bootstrap', type=int, default=1,
-                        help='Method of selecting samples for training each tree')
-    parser.add_argument('--regressor__max_depth', type=int, default=10,
-                        help=' Maximum number of levels in tree')
-    parser.add_argument('--regressor__max_features', type=str, default='auto',
-                        help='Number of features to consider at every split')
-    parser.add_argument('--regressor__min_samples_leaf', type=int, default=4,
-                        help='Minimum number of samples required at each leaf node')
-    parser.add_argument('--regressor__min_samples_split', type=int, default=5,
-                        help='Minimum number of samples required to split a node')
+    parser.add_argument(
+        "--regressor__n_estimators", type=int, default=500, help="Number of trees"
+    )
+    parser.add_argument(
+        "--regressor__bootstrap",
+        type=int,
+        default=1,
+        help="Method of selecting samples for training each tree",
+    )
+    parser.add_argument(
+        "--regressor__max_depth",
+        type=int,
+        default=10,
+        help=" Maximum number of levels in tree",
+    )
+    parser.add_argument(
+        "--regressor__max_features",
+        type=str,
+        default="auto",
+        help="Number of features to consider at every split",
+    )
+    parser.add_argument(
+        "--regressor__min_samples_leaf",
+        type=int,
+        default=4,
+        help="Minimum number of samples required at each leaf node",
+    )
+    parser.add_argument(
+        "--regressor__min_samples_split",
+        type=int,
+        default=5,
+        help="Minimum number of samples required to split a node",
+    )
 
     args = parser.parse_args()
 
     return args
 
+
 def main(args):
-    '''Read train dataset, train model, save trained model'''
+    """Read train dataset, train model, save trained model"""
 
     # Read train data
     train_data = pd.read_parquet(Path(args.train_data))
@@ -86,13 +107,15 @@ def main(args):
     X_train = train_data[NUMERIC_COLS + CAT_NOM_COLS + CAT_ORD_COLS]
 
     # Train a Random Forest Regression Model with the training set
-    model = RandomForestRegressor(n_estimators = args.regressor__n_estimators,
-                                  bootstrap = args.regressor__bootstrap,
-                                  max_depth = args.regressor__max_depth,
-                                  max_features = args.regressor__max_features,
-                                  min_samples_leaf = args.regressor__min_samples_leaf,
-                                  min_samples_split = args.regressor__min_samples_split,
-                                  random_state=0)
+    model = RandomForestRegressor(
+        n_estimators=args.regressor__n_estimators,
+        bootstrap=args.regressor__bootstrap,
+        max_depth=args.regressor__max_depth,
+        max_features=args.regressor__max_features,
+        min_samples_leaf=args.regressor__min_samples_leaf,
+        min_samples_split=args.regressor__min_samples_split,
+        random_state=0,
+    )
 
     # log model hyperparameters
     mlflow.log_param("model", "RandomForestRegressor")
@@ -114,7 +137,7 @@ def main(args):
     mse = mean_squared_error(y_train, yhat_train)
     rmse = np.sqrt(mse)
     mae = mean_absolute_error(y_train, yhat_train)
-    
+
     # log model performance metrics
     mlflow.log_metric("train r2", r2)
     mlflow.log_metric("train mse", mse)
@@ -122,8 +145,8 @@ def main(args):
     mlflow.log_metric("train mae", mae)
 
     # Visualize results
-    plt.scatter(y_train, yhat_train,  color='black')
-    plt.plot(y_train, y_train, color='blue', linewidth=3)
+    plt.scatter(y_train, yhat_train, color="black")
+    plt.plot(y_train, y_train, color="blue", linewidth=3)
     plt.xlabel("Real value")
     plt.ylabel("Predicted value")
     plt.savefig("regression_results.png")
@@ -134,7 +157,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    
+
     mlflow.start_run()
 
     # ---------- Parse Arguments ----------- #
@@ -150,7 +173,7 @@ if __name__ == "__main__":
         f"max_depth: {args.regressor__max_depth}",
         f"max_features: {args.regressor__max_features}",
         f"min_samples_leaf: {args.regressor__min_samples_leaf}",
-        f"min_samples_split: {args.regressor__min_samples_split}"
+        f"min_samples_split: {args.regressor__min_samples_split}",
     ]
 
     for line in lines:
@@ -159,4 +182,3 @@ if __name__ == "__main__":
     main(args)
 
     mlflow.end_run()
-    
